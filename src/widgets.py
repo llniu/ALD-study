@@ -13,7 +13,7 @@ def multi_checkbox_widget(descriptions:Iterable):
     search_widget = widgets.Text()
     options_dict = {description: widgets.Checkbox(description=description, value=False) for description in descriptions}
     options = [options_dict[description] for description in descriptions]
-    options_widget = widgets.VBox(options, layout={'overflow': 'scroll'})
+    options_widget = widgets.VBox(options, layout= widgets.Layout(flex_flow='row wrap'))
     multi_select = widgets.VBox([search_widget, options_widget])
 
     # Wire the search field to the checkboxes
