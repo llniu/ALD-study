@@ -1,0 +1,20 @@
+numpy
+# importlib_metadata==1.1
+# cryptography==2.3
+# zipp==0.6.0
+scipy
+# lxml==4.1
+# Cython==0.26
+# brotli==1.0.7
+# ipaddr==2.2.0
+# keyring==21.1.0
+# mypy_extensions==0.4.3
+# ordereddict==1.1
+# protobuf==3.11.2
+# pyOpenSSL==19.1.0
+scikit-learn
+# toml==0.10.0
+# usercustomize==1.0.0
+# wincertstore==0.2
+xgboost
+jupyterlab

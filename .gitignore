@@ -1,0 +1,6 @@
+venv_ald
+processed
+*__pycache__*
+*.ipynb_checkpoints
+*.pyc
+
