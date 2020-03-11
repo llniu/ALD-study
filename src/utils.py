@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sklearn as skl
+from sklearn import metrics as sklm
 
 def convert_to_numeric(data):
     df = data.copy()
@@ -24,7 +25,10 @@ def correlation(dataset, threshold):
                 
     return col_corr
 
-def model_performance_cv (X, y, features_selected, n_repeats):
+def model_performance_cv (clf, X, y, features_selected, n_repeats):
+    """
+    Perform repeated cross-validation with random splits of the data.
+    """
 
     performance_all = pd.DataFrame(columns = ['num_feat', 'train_roc_auc', 'test_roc_auc', 
                                           'features', 'precision',
@@ -37,37 +41,82 @@ def model_performance_cv (X, y, features_selected, n_repeats):
         y_train = y.iloc[train_index]
         y_test = y.iloc[test_index]
         
-        performance = model_performance(clf = clf_lr, features = features_selected, X_train = X_train, X_test = X_test, y_train = y_train, y_test = y_test)
+        performance = model_performance(clf = clf, features = features_selected, X_train = X_train, X_test = X_test, y_train = y_train, y_test = y_test)
         performance_all = performance_all.append(performance).round(2)
     
-    return(performance_all)
+    return performance_all
+
+def _get_metrics(y_true, y_pred, cutoff=0.5):
+    """Caculate a set of predefined binary metrics.
+
+    Parameters:
+    y: Pandas Series
+        observed, true binary outcome
+    y_pred_score: pandas.Series 
+        Binary predictions from model
+    cutoff: float
+        Probablity cutoff for classification as positive.
+
+
+    Return:
+    metrics: dict, keys are the metrics computed
+    """
+    y_pred = y_pred >= cutoff
+    sklearn_binary_metrics = ["roc_auc_score", 
+                        "auc",
+                        "cohen_kappa_score",
+                        "matthews_corrcoef",
+                        "f1_score",
+                        "recall_score",
+                        "precision_score",
+                        "confusion_matrix"
+                    ]
+    metrics = {}
+    for metric_key in sklearn_binary_metrics:
+        metric_fct = getattr(sklm, metric_key)
+        metric_value = metric_fct(y_true=y_true, y_pred=y_pred)
+        metrics[metric_key] = metric_value
+    
+    # balanced accuracy
+    # TN, FP, FN, TP unpacking
+    metrics["tn"], metrics["fp"], metrics["fn"], metrics["tp"] = metrics["confusion_matrix"]    
+    metrics["acc_bal"] = sklm.recall_score(y, y_pred_binary, average='macro')
+    
+    return  metrics
 
 def model_performance(clf, features, X_train, y_train, X_test, y_test):
     clf.fit(X_train[features], y_train)
+
     pred_train = clf.predict_proba(X_train[features])
     pred_test = clf.predict_proba(X_test[features])
     
-    y_pred_train = clf.predict(X_train[features])
+    # y_pred_train = clf.predict(X_train[features]) # not used
     y_pred_test = clf.predict(X_test[features])
     
-    tn, fp, fn, tp = confusion_matrix(y_test,  y_pred_test).ravel()
+    
     
     num_feat = len(features)
-    train_roc_auc = roc_auc_score(y_train, pred_train[:,1])
-    test_roc_auc = roc_auc_score(y_test, pred_test[:,1])
 
-    precision = tp/(tp + fp) if (tp + fp)!= 0 else np.nan
-    sensitivity = tp/(tp + fn) if (tp + fn)!= 0 else np.nan
-    specificity = tn/(tn + fp) if (tn + fp)!= 0 else np.nan    
-    f1_score = 2*precision*sensitivity/(precision+sensitivity) if (precision + sensitivity) != 0 else np.nan    
-    accuracy = (tp + tn)/(tp + tn + fp + fn) if (tp + tn +fp +fn) !=0 else np.nan
-    mcc_a = tp * tn - fp * fn
-    mcc_b = np.sqrt((tp + fp) * (fn + tn) * (fp + tn) * (tp + fn))
-    mcc = mcc_a/mcc_b if mcc_b != 0 else np.nan
+    metrics_train = _get_metrics(y_true=y_train, y_pred=pred_train, cutoff=0.5)
+    metrics_test  = _get_metrics(y_true=y_test, y_pred=pred_test, cutoff=0.5)
 
-    values = [num_feat, train_roc_auc, test_roc_auc, 
-              features, precision, sensitivity, specificity, f1_score, accuracy, mcc]
-    result = pd.DataFrame(values).T
+    # train_roc_auc = sklm.roc_auc_score(y_train, pred_train[:,1])
+    # test_roc_auc = sklm.roc_auc_score(y_test, pred_test[:,1])
+
+    # precision = tp/(tp + fp) if (tp + fp)!= 0 else np.nan
+    # sensitivity = tp/(tp + fn) if (tp + fn)!= 0 else np.nan
+    # specificity = tn/(tn + fp) if (tn + fp)!= 0 else np.nan    
+    # f1_score = 2*precision*sensitivity/(precision+sensitivity) if (precision + sensitivity) != 0 else np.nan    
+    # accuracy = (tp + tn)/(tp + tn + fp + fn) if (tp + tn +fp +fn) !=0 else np.nan
+    # mcc_a = tp * tn - fp * fn
+    # mcc_b = np.sqrt((tp + fp) * (fn + tn) * (fp + tn) * (tp + fn))
+    # mcc = mcc_a/mcc_b if mcc_b != 0 else np.nan
+    # precision = sklm.precision_score(y_true=y_test, y_pred=y_pred_test)
+
+
+    # metrics = [num_feat, train_roc_auc, test_roc_auc, 
+    #           features, precision, sensitivity, specificity, f1_score, accuracy, mcc]
+    result = pd.DataFrame(metrics).T
     result.columns = ['num_feat', 
                       'train_roc_auc', 
                       'test_roc_auc', 
@@ -78,7 +127,7 @@ def model_performance(clf, features, X_train, y_train, X_test, y_test):
                       'F1-score',
                       'accuracy',
                       'MCC']
-    return (result)
+    return result
 
 def feature_selection_by_rocauc(X_train, y_train, X_test, y_test, features):
     roc_values = []
