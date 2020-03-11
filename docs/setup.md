@@ -10,7 +10,7 @@ conda config --add channels conda-forge
 ```
 conda create --name ald_study python=3.7 scikit-learn scipy numpy jupyterlab py-xgboost pandas seaborn
 conda install ipywidgets
-jupyter labextension install @jupyterlab/toc # Table of Contents for IPYNBs
+jupyter labextension install @jupjuyterlab/toc # Table of Contents for IPYNBs
 conda install nb_conda  # convienence 
 
 
