@@ -2,6 +2,7 @@
 ### AFLD project
 - roughly 500 AFLD patients (to varying degrees) and 200 controls
 
+- Link to repository: [github.com/llniu/ALD-study](https://github.com/llniu/ALD-study)
 
 ### PRIDE Archives from Lili's paper on NAFLD:
 
