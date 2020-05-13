@@ -1,4 +1,6 @@
 venv_ald
+archiv
+data
 processed
 *__pycache__*
 *.ipynb_checkpoints
