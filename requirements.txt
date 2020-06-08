@@ -26,3 +26,5 @@ matplotlib==3.2.1
 xlrd
 xlwt
 openpyxl
+
+tqdm
