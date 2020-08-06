@@ -5,6 +5,16 @@ import seaborn as sns
 import sklearn as skl
 from sklearn import metrics as sklm
 
+def compare_count(df, column_1, column_2):
+    """Takes pandas.DataFrame and two of it's columns. Returns counts of 
+    two columns for values of the two columns."""
+    counts_df =  df[column_1].value_counts().sort_index().to_frame()
+    counts_df =  counts_df.merge(
+        df[column_2].value_counts().sort_index(),
+        left_index=True, right_index=True, how='outer')
+    counts_df.index.name = 'value counts'
+    return counts_df
+
 def convert_to_numeric(data):
     df = data.copy()
     columns = df.columns
