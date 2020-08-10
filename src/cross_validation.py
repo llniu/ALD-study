@@ -24,7 +24,8 @@ RANDOM_SEED = 123
 def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
                          scoring=['precision', 'recall', 'f1',
                              'balanced_accuracy', 'roc_auc'],
-                  prefix='') -> dict:
+                         prefix='',
+                         return_estimator=False) -> dict:
     """Run Cross Validation (cv) for binary classification example
     for a set of classifiers.
 
@@ -50,7 +51,8 @@ def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
     roc_curve_results = {}
     for key, clf in clf_dict.items():
         key = prefix + key
-        cv_results[key] = cross_validate(clf, X, y=y, cv=cv, scoring=scoring)
+        cv_results[key] = cross_validate(clf, X, y=y, cv=cv, scoring=scoring,
+                                         return_estimator=return_estimator)
         cv_results[key]['num_feat'] = X.shape[-1]
         cv_results[key]['n_obs'] = len(y)
     return cv_results
@@ -78,6 +80,9 @@ def _get_cv_means(results_dict: dict) -> pd.DataFrame:
         pandas.DataFrame holding the results.
     """
     results = pd.DataFrame(results_dict)
+
+    if 'estimator' in results.index:
+        results = results.drop('estimator')
 
     cv_means = results.applymap(np.mean).T
     cv_std = results.applymap(np.std).T
