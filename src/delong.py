@@ -4,7 +4,6 @@ https://github.com/yandexdataschool/roc_comparison
 import os
 import sys
 import logging
-# logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 

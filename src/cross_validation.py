@@ -1,5 +1,7 @@
 import os
 import logging
+logger = logging.getLogger()
+
 from collections import defaultdict
 from collections.abc import Iterable
 
@@ -152,7 +154,7 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
          cv_train_test_indices = rskf.split(X, y)
          cv_train_test_indices = [(X.index[train_indices], X.index[test_indices])
                                    for train_indices, test_indices in cv_train_test_indices]
-         logging.warning(
+         logger.warning(
              'Splits based on provided data to fit, not globally. Do not compare between models.')
     elif isinstance(cv, Iterable):
         # assert isinstance(cv, Iterable)
@@ -374,5 +376,5 @@ class MainExecutorCV():
         _intersection = index_1.intersection(index_2)
         _diff_to_1 = index_1.difference(_intersection)
         if len(_diff_to_1) > 0:
-            logging.warning("Sample with clinical features not in demographics: {}".format(", ".join(_diff_to_1)))
+            logger.warning("Sample with clinical features not in demographics: {}".format(", ".join(_diff_to_1)))
         return _intersection, _diff_to_1
