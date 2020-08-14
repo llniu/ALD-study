@@ -1,0 +1,18 @@
+name: ald_study 
+channels:
+  - base
+  - conda-forge
+dependencies:
+  - ipywidgets=7.5
+  - ipykernel=5.3
+  - jupyterlab
+  - numpy=1.18
+  - pandas=1.1
+  - py-xgboost=0.90
+  - python=3.7 
+  - scikit-learn=0.23
+  - scipy=1.5
+  - seaborn=0.10
+  - tqdm
+  - xlrd=1
+  - openpyxl
