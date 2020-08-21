@@ -8,5 +8,6 @@ clinical_marker_test_cut-offs.xlsx
 df_cli_164.csv
 Experiment annotation file.csv
 ID_matching_key.csv
+naming_scheme.csv
 README.txt
 ```
