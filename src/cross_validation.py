@@ -10,11 +10,12 @@ import pandas as pd
 
 from sklearn.model_selection import cross_validate
 from sklearn.preprocessing import PolynomialFeatures
-
+from joblib import dump
 import sklearn.metrics as sklm
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import precision_recall_curve
 from sklearn.model_selection import RepeatedStratifiedKFold
+from IPython.display import display
 
 from src.threshold_classifier import ThresholdClassifier
 
@@ -25,7 +26,7 @@ RANDOM_SEED = 123
 
 def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
                          scoring=['precision', 'recall', 'f1',
-                             'balanced_accuracy', 'roc_auc'],
+                                  'balanced_accuracy', 'roc_auc'],
                          prefix='',
                          return_estimator=False) -> dict:
     """Run Cross Validation (cv) for binary classification example
@@ -50,7 +51,6 @@ def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
     dict: dict with keys of clf_dict and computed results for each run.
     """
     cv_results = {}
-    roc_curve_results = {}
     for key, clf in clf_dict.items():
         key = prefix + key
         cv_results[key] = cross_validate(clf, X, y=y, cv=cv, scoring=scoring,
@@ -59,7 +59,7 @@ def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
         cv_results[key]['n_obs'] = len(y)
     return cv_results
 
-#ToDo: Write a (doc)test and or see if this is can be done differently
+# ToDo: Write a (doc)test and or see if this is can be done differently
 
 
 def _get_cv_means(results_dict: dict) -> pd.DataFrame:
@@ -109,7 +109,7 @@ scorer_dict = {}
 scoring = ['precision', 'recall', 'f1', 'balanced_accuracy', 'roc_auc']
 scorer_dict = {metric: metric+'_score' for metric in scoring}
 scorer_dict = {key: getattr(sklm, metric)
-                            for key, metric in scorer_dict.items()}
+               for key, metric in scorer_dict.items()}
 
 
 def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
@@ -149,13 +149,13 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
         raise ValueError(
             "Please provide an Iterable of pandas.Index tuples or integer")
     elif isinstance(cv, int):
-         rskf = RepeatedStratifiedKFold(
-             n_splits=cv, n_repeats=CV_REPEATS, random_state=RANDOM_SEED)
-         cv_train_test_indices = rskf.split(X, y)
-         cv_train_test_indices = [(X.index[train_indices], X.index[test_indices])
-                                   for train_indices, test_indices in cv_train_test_indices]
-         logger.warning(
-             'Splits based on provided data to fit, not globally. Do not compare between models.')
+        rskf = RepeatedStratifiedKFold(
+            n_splits=cv, n_repeats=CV_REPEATS, random_state=RANDOM_SEED)
+        cv_train_test_indices = rskf.split(X, y)
+        cv_train_test_indices = [(X.index[train_indices], X.index[test_indices])
+                                 for train_indices, test_indices in cv_train_test_indices]
+        logger.warning(
+            'Splits based on provided data to fit, not globally. Do not compare between models.')
     elif isinstance(cv, Iterable):
         # assert isinstance(cv, Iterable)
         cv_train_test_indices = cv
@@ -190,10 +190,11 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
                     folder = 'model_scores'
                 os.makedirs(folder, exist_ok=True)
                 if i == 0:
-                    _fname = os.path.join(folder, f'{key_clf}.csv')
+                    _fname = os.path.join(folder, f'{key_clf}')
                 else:
                     _fname = os.path.join(folder, f'{key_clf}_{i}.csv')
-                target_comp_df.to_csv(_fname)
+                target_comp_df.to_csv(f'{_fname}.csv')
+                dump(clf, f'{_fname}.joblib')
 
             for metric_name, metric_fct in scorer_dict.items():
                 if metric_name == 'roc_auc':
@@ -205,7 +206,7 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
             _cv_results['num_feat'].append(X.shape[-1])
             _cv_results['n_obs'].append(len(y))
 
-            #additonal features requested: set verbose
+            # additonal features requested: set verbose
             if verbose:
                 _cv_results['prop_y_train'].append(y_train.mean())
                 _cv_results['prop_y_test'].append(y_test.mean())
@@ -318,9 +319,9 @@ class MainExecutorCV():
             auc_scores.update(_auc_roc)
             prc_scores.update(_auc_prc)
 
-        #additional marker models (single clinical variable, trained)
-        #add cutoff models based on data
-        #ToDo: Explain that all markers are now trained (thresholds are adapted)
+        # additional marker models (single clinical variable, trained)
+        # add cutoff models based on data
+        # ToDo: Explain that all markers are now trained (thresholds are adapted)
         additional_markers.extend(list(cutoffs_endpoint.keys()))
         for key in additional_markers:
             _X, _y = self._select_features(X[key], y, add_demographics)
@@ -332,11 +333,11 @@ class MainExecutorCV():
                 auc_scores.update(_auc_roc)
                 prc_scores.update(_auc_prc)
 
-        #proteomics models (based on provided protein selection)
+        # proteomics models (based on provided protein selection)
         _X, _y = self._select_features(
             self.data_proteomics[proteins_selected.index], y, add_demographics)
 
-        #Add interaction to _X
+        # Add interaction to _X
         if interactions_degree > 1:
             assert isinstance(interactions_degree, int), "Please pass an interaction_degree of type int, not {}".format(
                 type(interactions_degree))
@@ -353,28 +354,30 @@ class MainExecutorCV():
         return results, auc_scores, prc_scores
 
     def _select_features(self, X, y, add_demographics):
-            if isinstance(X, pd.Series):
-                X = X.to_frame()
-            _X = X.dropna()
-            in_both = y.index.intersection(_X.index)
-            _X = _X.loc[in_both]
-            _y = y.loc[in_both]
+        if isinstance(X, pd.Series):
+            X = X.to_frame()
+        _X = X.dropna()
+        in_both = y.index.intersection(_X.index)
+        _X = _X.loc[in_both]
+        _y = y.loc[in_both]
 
-            if add_demographics:
-                _index_tmp = _X.index
-                _X = _X.join(self.demographics).dropna()
-                _y = y.loc[_X.index]
-                _intersection, _diff_to_1 = self._get_common_indices(_index_tmp, _X.index)
+        if add_demographics:
+            _index_tmp = _X.index
+            _X = _X.join(self.demographics).dropna()
+            _y = y.loc[_X.index]
+            _intersection, _diff_to_1 = self._get_common_indices(
+                _index_tmp, _X.index)
 
-            assert _X.isna().sum().sum() == 0
-            assert _y.isna().sum() == 0
+        assert _X.isna().sum().sum() == 0
+        assert _y.isna().sum() == 0
 
-            return _X, _y
+        return _X, _y
 
     @staticmethod
     def _get_common_indices(index_1, index_2):
         _intersection = index_1.intersection(index_2)
         _diff_to_1 = index_1.difference(_intersection)
         if len(_diff_to_1) > 0:
-            logger.warning("Sample with clinical features not in demographics: {}".format(", ".join(_diff_to_1)))
+            logger.warning("Sample with clinical features not in demographics: {}".format(
+                ", ".join(_diff_to_1)))
         return _intersection, _diff_to_1
