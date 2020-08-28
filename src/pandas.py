@@ -8,7 +8,7 @@ def combine_value_counts(X:pd.DataFrame, dropna=True):
     """
     _df = pd.DataFrame()
     for col in X.columns:
-        __df = _df.join(X[col].value_counts(dropna=dropna), how='outer')
+        _df = _df.join(X[col].value_counts(dropna=dropna), how='outer')
     freq_targets = _df.sort_index()
     return freq_targets
 
