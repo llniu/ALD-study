@@ -16,6 +16,10 @@ class ConfusionMatrix():
             self.df.columns.name = 'pred'
         return self.df
     
+    @property
+    def as_array(self):
+        return self.cm_
+    
     def __str__(self):
         return str(self.cm_)
     
