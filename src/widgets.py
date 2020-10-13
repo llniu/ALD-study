@@ -4,6 +4,7 @@ from typing import Iterable
 
 import pandas as pd
 import ipywidgets as widgets
+from IPython.display import display
 
 def create_show_data(index_col, datafolder):
     """Closure to build data viewer for entire dataset."""

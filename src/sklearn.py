@@ -7,18 +7,19 @@ class FeatureSelector():
     """Namespace for feature selection.
     Uses mutal information to select k best features. 
     Can combine the best for a set of targets to a combined maximum.
-    
-    Parameters
-    ----------
-    k: int
-        top-k features for each endpoint
-    protein_gene_data: pandas.DataFrame (shape: X_N, 1)
-        Optional mapping of index of DataFrame passed to fit method
-        to values in protein_gene_data. Here this is the associated gene-name
-        to a protein.
-    
     """
     def __init__(self, k=10, protein_gene_data=None):
+        """Initialize FeatureSelector.
+
+        Parameters
+        ----------
+        k : int, optional
+            top-k features for each endpoint, by default 10
+        protein_gene_data : pandas.DataFrame (shape: X_N, 1), optional
+            Optional mapping of index of DataFrame passed to fit method
+            to values in protein_gene_data. Here this is the associated gene-name
+            to a protein., by default None
+        """        
         self.k = k
         self.protein_gene_id = protein_gene_data
         self.endpoints_scores = {}
@@ -35,9 +36,22 @@ class FeatureSelector():
         return self.endpoints_scores[col_name]
     
     def get_k_best(self, col_name, k):
-        """
-        col_name: target column for comparison. Corresponds to provided y Series.
-        """
+        """Get the k-best features based on the analysis
+
+        Parameters
+        ----------
+        col_name : str
+            target column for comparison.
+        k : int
+            k-best features to be returned
+
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame with index containing the k-best features. 
+            Ordered by value. If gene IDs are available, these
+            are outputted instead of the Mutual Information score.
+        """        
         selected_ = self.endpoints_scores[col_name].nlargest(k)
         if self.protein_gene_id is not None:
             result = self.protein_gene_id.loc[selected_.index]

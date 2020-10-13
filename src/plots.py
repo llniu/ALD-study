@@ -1,5 +1,8 @@
+import logging
 import numpy as np
 from sklearn.metrics import roc_curve, auc
+
+logger = logging.getLogger()
 
 
 def plot_performance(ax, result, metric, title, _process_index=None):
@@ -44,11 +47,31 @@ def plot_performance(ax, result, metric, title, _process_index=None):
     return ax
 
 
-def plot_roc_curve(ax, runs_roc_auc_scores, endpoint=''):
+def plot_roc_curve(ax, runs_roc_scores, endpoint='', verbose=False):
+    """Plot the Receiver Operation Curve for a run.
+
+    Parameters
+    ----------
+    ax : matplotlib.Axes
+        Axes to draw on.
+    runs_roc_scores : list, Iterable
+        List of (fpr, tpr, threshold) values obtained from 
+        sklearn.metrics.sklearn.metrics.roc_curve
+    endpoint : str
+        Selected endpoint for evaluation, e.g. "F2", by default ''
+        Only used for labeling.
+    verbose : bool
+        Log Confidence Interval, by default False
+
+    Returns
+    -------
+    matplotlib.Axes 
+        Return reference to the passed ax of the argument `ax`
+    """
     tprs = []
     base_fpr = np.linspace(0, 1, 101)
     roc_aucs = []
-    for fpr, tpr, threshold in runs_roc_auc_scores:
+    for fpr, tpr, threshold in runs_roc_scores:
         roc_auc = auc(fpr, tpr)
         roc_aucs.append(roc_auc)
 
@@ -69,7 +92,9 @@ def plot_roc_curve(ax, runs_roc_auc_scores, endpoint=''):
     sd_rocauc = np.std(roc_aucs).round(2)
     se_rocauc = sd_rocauc/np.sqrt(len(roc_aucs))
 
-    CI = (mean_rocauc-1.96 * se_rocauc, mean_rocauc + 1.96 * se_rocauc)
+    if verbose:
+        CI = (mean_rocauc-1.96 * se_rocauc, mean_rocauc + 1.96 * se_rocauc)
+        logger.info("95% CI:{}".format(CI))
 
     ax.plot(base_fpr, mean_tprs, color='royalblue',
             label='Mean ROC\n(AUC = {}±{})'.format(mean_rocauc, sd_rocauc))
@@ -84,22 +109,35 @@ def plot_roc_curve(ax, runs_roc_auc_scores, endpoint=''):
     ax.tick_params(labelsize=15)
     ax.legend(fontsize=12)
     ax.set_title('{}\nProteomic panel'.format(endpoint), fontsize=15)
-    # print("95% CI:{}".format(CI))
     return ax
 
 
-def plot_prc_curve(ax, runs_roc_auc_scores, endpoint=''):
-    """[summary]
+def plot_prc_curve(ax, runs_prc_scores, endpoint='', verbose=False):
+    """Plot Precision Recall Curve (PRC) for a list of scores.
 
-    Args:
-        ax ([type]): [description]
-        runs_roc_auc_scores ([type]): [description]
-        endpoint (str, optional): [description]. Defaults to ''.
-    """
+    Parameters
+    ----------
+    ax : matplotlib.Axes
+        Axes to draw on.
+    runs_prc_scores : list, Iterable
+        List with tuples of 
+        (precision, recall, thresholds, average_precision)
+        obtained from sklearn.metrics.average_precision_score
+        and sklearn.metrics.average_precision_score
+    endpoint : str, optional
+        [description], by default ''
+    verbose : bool, optional
+        log confidence interval, by default False
+
+    Returns
+    -------
+    matplotlib.Axes 
+        Return reference to the passed ax of the argument `ax`
+    """    
     precisions = []
     base_recall = np.linspace(0, 1, 101)
     avg_precision = []
-    for precision, recall, thresholds, _average_precision in runs_roc_auc_scores:
+    for precision, recall, threshold, _average_precision in runs_prc_scores:
 
         avg_precision.append(_average_precision)
 
@@ -108,6 +146,7 @@ def plot_prc_curve(ax, runs_roc_auc_scores, endpoint=''):
         precision = np.interp(base_recall, recall[::-1], precision[::-1])
         precision[-1] = 0.0
         precisions.append(precision)
+
     ax.set(xlabel="Recall", ylabel="Precision")
 
     precisions = np.array(precisions)
@@ -121,7 +160,10 @@ def plot_prc_curve(ax, runs_roc_auc_scores, endpoint=''):
     sd_avg_prec = np.std(avg_precision).round(2)
     se_avg_prec = sd_avg_prec/np.sqrt(len(avg_precision))
 
-    CI = (mean_avg_prec-1.96 * se_avg_prec, mean_avg_prec + 1.96 * se_avg_prec)
+    if verbose:
+        CI = (mean_avg_prec-1.96 * se_avg_prec,
+              mean_avg_prec + 1.96 * se_avg_prec)
+        logger.info("95% CI:{}".format(CI))
 
     ax.plot(base_recall, mean_precisions, color='royalblue',
             label='Mean Avg. Prec.= {}±{})'.format(mean_avg_prec, sd_avg_prec))
@@ -136,4 +178,3 @@ def plot_prc_curve(ax, runs_roc_auc_scores, endpoint=''):
     ax.tick_params(labelsize=15)
     ax.legend(fontsize=12)
     ax.set_title('{}\nProteomic panel'.format(endpoint), fontsize=15)
-    print("95% CI:{}".format(CI))
