@@ -1,27 +1,25 @@
-import os
 import logging
-logger = logging.getLogger()
+import os
 
 from collections import defaultdict
 from collections.abc import Iterable
 
 import numpy as np
-import pandas as pd
-
-from sklearn.model_selection import cross_validate
-from sklearn.preprocessing import PolynomialFeatures
-from joblib import dump
-import sklearn.metrics as sklm
-from sklearn.metrics import roc_curve, auc
-from sklearn.metrics import precision_recall_curve
-from sklearn.model_selection import RepeatedStratifiedKFold
 from IPython.display import display
+from joblib import dump
 
+import pandas as pd
+import sklearn.metrics as sklm
+from sklearn.metrics import auc, precision_recall_curve, roc_curve
+from sklearn.model_selection import RepeatedStratifiedKFold, cross_validate
+from sklearn.preprocessing import PolynomialFeatures
 from src.threshold_classifier import ThresholdClassifier
 
 CV_FOLDS = 5
 CV_REPEATS = 10
 RANDOM_SEED = 123
+
+logger = logging.getLogger()
 
 
 def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
@@ -32,23 +30,26 @@ def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
     """Run Cross Validation (cv) for binary classification example
     for a set of classifiers.
 
-
     Inputs
     ------
-    clf_dict: dict
+    clf_dict : dict
         Dictionary with keys and scikit-learn classifiers as values.
-    X: 2D-array, pd.DataFrame
+    X : 2D-array, pd.DataFrame
         Input data
-    y: 1D-array, pd.Series
+    y : 1D-array, pd.Series
         Targets for classification
-    cv: int
-        Number of splits for Cross-Validation.
-    prefix: str
+    cv : int, optinal
+        Number of splits for Cross-Validation, by default 5
+    prefix : str, optional
         Prefix for clf-key for custom naming.
+    return_estimator : bool, optional
+        Add the sklearn estimator to the list of returned keys for each
+        CV run, by default False
 
     Returns
     -------
-    dict: dict with keys of clf_dict and computed results for each run.
+    dict
+        dictionary with keys of clf_dict and computed results for each run.
     """
     cv_results = {}
     for key, clf in clf_dict.items():
@@ -131,11 +132,19 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
         Input data
     y : 1D-array, pd.Series
         Targets for classification
-    splits : List of pandas.Index tuples denoting global training and test indices.
-    cv : int, cross-validation generator or an iterable, default=None
-        Number of splits for Cross-Validation.
-    prefix : str
-        Prefix for clf-key for custom naming.
+    cv : Iterable, int
+        Cross-validation generator, an iterable or
+        number of splits for Cross-Validation, by default None
+    verbose : bool, optional
+        logging logging.INFO statements, by default False
+    prefix : str, optional
+        Prefix for clf-key for custom naming, by default ''
+    folder: str, optional
+        path/to/folder for outputs, by default None
+    save_predictions: bool, optional
+        dump prediction of each CV run of the train and test data to disk.
+
+
 
     Returns
     -------
@@ -155,7 +164,8 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
         cv_train_test_indices = [(X.index[train_indices], X.index[test_indices])
                                  for train_indices, test_indices in cv_train_test_indices]
         logger.warning(
-            'Splits based on provided data to fit, not globally. Do not compare between models.')
+            'Splits based on provided data to fit, not globally.'
+            ' Do not compare between models.')
     elif isinstance(cv, Iterable):
         # assert isinstance(cv, Iterable)
         cv_train_test_indices = cv
@@ -181,12 +191,14 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
 
             if save_predictions:
                 target_comp_df = pd.DataFrame(
-                    {'y_test': y_test, 'y_test_pred':  y_score[:, 1]})
+                    {'y_test': y_test,
+                     'y_test_pred':  y_score[:, 1]})
                 _df = pd.DataFrame(
-                    {'y_train': y_train, 'y_train_pred': clf.predict_proba(X_train)[:, 1]})
+                    {'y_train': y_train,
+                     'y_train_pred': clf.predict_proba(X_train)[:, 1]})
                 target_comp_df = target_comp_df.join(_df, how='outer')
 
-                if folder == None:
+                if folder is None:
                     folder = 'model_scores'
                 os.makedirs(folder, exist_ok=True)
                 if i == 0:
@@ -242,7 +254,8 @@ class MainExecutorCV():
                  clf_sklearn: dict,
                  demographics: pd.DataFrame,
                  endpoints_defined: Iterable = ['F2', 'F3', 'S1', 'I2']):
-        """Executor of Cross Validation of this project. Can be seen as a stateful main function.
+        """Executor of Cross Validation of this project.
+        Can be seen as a stateful main function.
 
         Parameters
         ----------
@@ -253,14 +266,15 @@ class MainExecutorCV():
             Clinical features. Should include features specified by `cutoffs_clinc`
             and `demographics`.
         cutoffs_clinic : pd.DataFrame
-            [description]
+            Table of cutoffs for each endpoint (columns) by clinical marker (rows).
         clf_sklearn : dict
             Dictionary with sklearn classifiers to consider.
             {model-key: sklearn-model-instance}
         demographics : pd.DataFrame
             `pandas.DataFrame` holding additional (demographic) features for samples.
         endpoints_defined : list, optional
-            [description], by default ['F2', 'F3', 'S1', 'I2']
+            List of endpoints in for this
+            comparison (study specific), by default ['F2', 'F3', 'S1', 'I2']
         """
         self.data_proteomics = proteomics_data
         self.data_clinic = clinical_data
@@ -287,9 +301,41 @@ class MainExecutorCV():
                        interactions_degree=1,
                        verbose=False,
                        evaluator_fct=run_cv_binary,
-                       cv=CV_FOLDS, n_repeats=CV_REPEATS):
-        """Custom function to run standarda analysis for an endpoint based on
-        predefined cutoffs, specified clinical variables"""
+                       cv=CV_FOLDS):
+        f"""Custom function to run standarda analysis for an endpoint based on
+        predefined cutoffs, specified clinical variables
+
+        Parameters
+        ----------
+        y : pd.Series
+            pandas.Series of targets. The index is the sample_ID.
+        endpoint : str
+            Selected endpoint for evaluation, e.g. "F2".
+        additional_markers : list
+            Additional clinical markers to consider. These will be fitted
+            on the training data, as probably no threshold is defined for
+            them in the literature.
+        proteins_selected : pd.Index
+            Proteins to be included in the proteomics models.
+        add_demographics : bool, optional
+            Add demographic features to models, by default False
+        interactions_degree : int, optional
+            Create interactions of features. E.g. 2 would expand two features
+            a, b to a, a², b, b² and a*b, by default 1
+        verbose : bool, optional
+            Displaz the clinical thresholds and a summary of the
+            clinical data, by default False
+        evaluator_fct : function, optional
+            Function to use for evaluation run, by default run_cv_binary
+        cv : Iterable, int
+            Cross-validation generator, an iterable or
+            number of splits for Cross-Validation, by default {CV_FOLDS}
+
+        Returns
+        -------
+        [type]
+            [description]
+        """
         assert endpoint in self.endpoints_defined, 'Unknown endpoint. Select one of '
         f'{", ".join(self.endpoints_defined)}'
 
@@ -339,8 +385,9 @@ class MainExecutorCV():
 
         # Add interaction to _X
         if interactions_degree > 1:
-            assert isinstance(interactions_degree, int), "Please pass an interaction_degree of type int, not {}".format(
-                type(interactions_degree))
+            assert isinstance(interactions_degree, int), (
+                "Please pass an interaction_degree of type int, not {}".format(
+                    type(interactions_degree)))
             poly_features = PolynomialFeatures(
                 degree=interactions_degree, include_bias=False)
             _X = pd.DataFrame(poly_features.fit_transform(_X), index=_X.index)
@@ -374,10 +421,12 @@ class MainExecutorCV():
         return _X, _y
 
     @staticmethod
-    def _get_common_indices(index_1, index_2):
+    def _get_common_indices(index_1:    pd.Index, index_2:    pd.Index):
+        """Get intersection of indices"""
         _intersection = index_1.intersection(index_2)
         _diff_to_1 = index_1.difference(_intersection)
         if len(_diff_to_1) > 0:
-            logger.warning("Sample with clinical features not in demographics: {}".format(
-                ", ".join(_diff_to_1)))
+            logger.warning(
+                "Sample with clinical features not in demographics: {}".format(
+                    ", ".join(_diff_to_1)))
         return _intersection, _diff_to_1

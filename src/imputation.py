@@ -1,19 +1,27 @@
 """Imputation of proteomics data."""
+import logging
 import numpy as np
 import pandas as pd
 
+logger = logging.getLogger()
+
 NP_LOG_FCT = np.log2
+
 
 def log2(row: pd.Series):
     """Apply log Transformation to values."""
     return NP_LOG_FCT(row.where(row != 0.0))
 
+
 RANDOM_SEED = 123
 
-IMPUTATION_MEAN_SHIFT    = 1.8
+IMPUTATION_MEAN_SHIFT = 1.8
 IMPUTATION_STD_SHRINKAGE = 0.3
 
-def imputation_normal_distribution(log_intensities: pd.Series, mean_shift=IMPUTATION_MEAN_SHIFT, std_shrinkage=IMPUTATION_STD_SHRINKAGE):
+
+def imputation_normal_distribution(log_intensities: pd.Series,
+                                   mean_shift=IMPUTATION_MEAN_SHIFT,
+                                   std_shrinkage=IMPUTATION_STD_SHRINKAGE):
     """Impute missing log-transformed intensity values of DDA run.
 
     Parameters
@@ -25,17 +33,19 @@ def imputation_normal_distribution(log_intensities: pd.Series, mean_shift=IMPUTA
         Shift the mean of the log_intensities by factors of their standard
         deviation to the negative.
     std_shrinkage: float
-        Value greater than zero by which to shrink (or inflate) the 
+        Value greater than zero by which to shrink (or inflate) the
         standard deviation of the log_intensities.
     """
     np.random.seed(RANDOM_SEED)
     if not isinstance(log_intensities, pd.Series):
         try:
-            log_intensities.Series(log_intensities)
+            # array-like, Iterable, dict, or scalar value?
+            log_intensities = pd.Series(log_intensities)
             logger.warning("Series created of Iterable.")
-        except:
+        except Exception as e:
             raise ValueError(
-                "Plese provided data which is a pandas.Series or an Iterable")
+                "Plese provided data which is a pandas.Series or an Iterable",
+                e)
     if mean_shift < 0:
         raise ValueError(
             "Please specify a positive float as the std.-dev. is non-negative.")
