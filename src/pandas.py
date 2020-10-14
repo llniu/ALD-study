@@ -38,7 +38,7 @@ def create_dichotome(series: pd.Series, cutoff_ge):
     series : pd.Series
         pandas.Series with values to dicotomize
     cutoff_ge : int, float
-        Greater equal (ge) for which a one is assigned. 
+        Greater equal (ge) for which a one is assigned.
         Everything below will be set to zero.
 
     Returns

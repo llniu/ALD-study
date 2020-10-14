@@ -1,6 +1,6 @@
 import logging
 import numpy as np
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import auc
 
 logger = logging.getLogger()
 
@@ -17,14 +17,14 @@ def plot_performance(ax, result, metric, title, _process_index=None):
         columns object of the type ('metric', ('mean', 'stddev'))
     metric : pandas.DataFrame
         The metric to select from the columns of the `result` DataFrame.
-    title : str     
+    title : str
         Title of the axes
     _process_index : function, optional
         Function to process model names, by default None
 
     Returns
     -------
-    matplotlib.Axes 
+    matplotlib.Axes
         Return reference to the passed ax of the argument `ax`
     """
     df = result.copy()
@@ -55,7 +55,7 @@ def plot_roc_curve(ax, runs_roc_scores, endpoint='', verbose=False):
     ax : matplotlib.Axes
         Axes to draw on.
     runs_roc_scores : list, Iterable
-        List of (fpr, tpr, threshold) values obtained from 
+        List of (fpr, tpr, threshold) values obtained from
         sklearn.metrics.sklearn.metrics.roc_curve
     endpoint : str
         Selected endpoint for evaluation, e.g. "F2", by default ''
@@ -65,7 +65,7 @@ def plot_roc_curve(ax, runs_roc_scores, endpoint='', verbose=False):
 
     Returns
     -------
-    matplotlib.Axes 
+    matplotlib.Axes
         Return reference to the passed ax of the argument `ax`
     """
     tprs = []
@@ -120,7 +120,7 @@ def plot_prc_curve(ax, runs_prc_scores, endpoint='', verbose=False):
     ax : matplotlib.Axes
         Axes to draw on.
     runs_prc_scores : list, Iterable
-        List with tuples of 
+        List with tuples of
         (precision, recall, thresholds, average_precision)
         obtained from sklearn.metrics.average_precision_score
         and sklearn.metrics.average_precision_score
@@ -131,9 +131,9 @@ def plot_prc_curve(ax, runs_prc_scores, endpoint='', verbose=False):
 
     Returns
     -------
-    matplotlib.Axes 
+    matplotlib.Axes
         Return reference to the passed ax of the argument `ax`
-    """    
+    """
     precisions = []
     base_recall = np.linspace(0, 1, 101)
     avg_precision = []

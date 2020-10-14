@@ -42,9 +42,9 @@ class ThresholdClassifier(sklearn.base.BaseEstimator, sklearn.base.ClassifierMix
         ValueError
             If clinical marker specified on construction is not part of the data.
         ValueError
-            If clinical data contains missing values. 
+            If clinical data contains missing values.
         """
-        #ToDo: Call checks from method.        
+        # #ToDo: Call checks from method.
         self.markers = set(self.threshold.keys())
         """Nothing to fit"""
         if not self.markers.issubset(set(data.columns)):
@@ -54,7 +54,7 @@ class ThresholdClassifier(sklearn.base.BaseEstimator, sklearn.base.ClassifierMix
             raise ValueError("Data does contain missing values. Please impute values.")
 
     def predict_proba(self, data):
-        """Classify for each thresholds and then aggregate results 
+        """Classify for each thresholds and then aggregate results
         by taking the mean."""
         select_markers, thresholds = self.threshold.keys(), self.threshold.values()
         result = data.loc[:, select_markers] > list(thresholds)
