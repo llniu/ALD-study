@@ -1,0 +1,11 @@
+venv_ald
+archiv
+data
+processed
+tables
+figures
+
+*__pycache__*
+*.ipynb_checkpoints
+*.pyc
+
