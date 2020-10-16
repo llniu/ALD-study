@@ -10,7 +10,6 @@ import pandas as pd
 from roc_comparison import compare_auc_delong_xu
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 def calc_p_value_delong_xu(model_1: str, model_2: str, folder_dumps: str,
