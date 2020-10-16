@@ -12,6 +12,7 @@ file                      | description
 [ALD_ML](ALD_ML.ipynb)    | Contains data pre-processing, Feature Selection, <br> Cross-Validation runs, Final model calculation and diverse <br> plots. Some functionality is loaded from [`src`](src)
 [ALD_ML_STATA](ALD_ML_STATA.ipynb) | References to STATA `.do` files in main folder. Done in hospital on follow-up data.
 [ALD_PA](ALD_PA.ipynb)    | Contains Proteomics and Clinical data pre-processing, ANCOVA, Partial correlation, Integration between the liver- and plasma proteomes, and plots.
+[ALD_App](ALD_app.py)     | Contains interactive data visualization Dash App. 
 
 ## BioRxiv
 
