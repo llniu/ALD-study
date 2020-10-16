@@ -26,7 +26,7 @@ def run_cv_binary_simple(clf_dict: dict, X: pd.DataFrame, y: pd.Series, cv=5,
                          scoring=['precision', 'recall', 'f1',
                                   'balanced_accuracy', 'roc_auc'],
                          prefix='',
-                         return_estimator=False) -> dict:
+                         return_estimator=False, **kwargs) -> dict:
     """Run Cross Validation (cv) for binary classification example
     for a set of classifiers.
 
@@ -85,7 +85,9 @@ def _get_cv_means(results_dict: dict) -> pd.DataFrame:
     results = pd.DataFrame(results_dict)
 
     if 'estimator' in results.index:
-        results = results.drop('estimator')
+        results = results.drop('estimator')  # sklearn estimator obj
+    if 'y_test' in results.index:
+        results = results.drop('y_test')   # array of scores on test set
 
     cv_means = results.applymap(np.mean).T
     cv_std = results.applymap(np.std).T
@@ -136,7 +138,7 @@ def run_cv_binary(clf_dict: dict, X: pd.DataFrame, y: pd.Series,
         Cross-validation generator, an iterable or
         number of splits for Cross-Validation, by default None
     verbose : bool, optional
-        logging logging.INFO statements, by default False
+        logging logging.INFO statements and additional metrics, by default False
     prefix : str, optional
         Prefix for clf-key for custom naming, by default ''
     folder: str, optional
@@ -324,7 +326,7 @@ class MainExecutorCV():
             a, b to a, a², b, b² and a*b, by default 1
         verbose : bool, optional
             Displaz the clinical thresholds and a summary of the
-            clinical data, by default False
+            clinical data, more metrics, by default False
         evaluator_fct : function, optional
             Function to use for evaluation run, by default run_cv_binary
         cv : Iterable, int
@@ -360,7 +362,7 @@ class MainExecutorCV():
             assert _y.isna().sum() == 0
 
             _res, _auc_roc, _auc_prc = evaluator_fct(
-                {f'{endpoint}_marker_{key}': clf}, X=_X, y=_y, cv=cv)
+                {f'{endpoint}_marker_{key}': clf}, X=_X, y=_y, cv=cv, verbose=verbose)
             results.update(_res)
             auc_scores.update(_auc_roc)
             prc_scores.update(_auc_prc)
@@ -374,7 +376,8 @@ class MainExecutorCV():
 
             for key_clf, clf in self.clf_sklearn.items():
                 _res, _auc_roc, _auc_prc = evaluator_fct(
-                    {f'{endpoint}_marker_{key}_{key_clf}': clf}, X=_X, y=_y, cv=cv)
+                    {f'{endpoint}_marker_{key}_{key_clf}': clf}, X=_X, y=_y, cv=cv,
+                    verbose=verbose)
                 results.update(_res)
                 auc_scores.update(_auc_roc)
                 prc_scores.update(_auc_prc)
@@ -393,7 +396,8 @@ class MainExecutorCV():
             _X = pd.DataFrame(poly_features.fit_transform(_X), index=_X.index)
 
         _res, _auc_roc, _auc_prc = evaluator_fct(
-            self.clf_sklearn, X=_X, y=_y, prefix=f'{endpoint}_prot_', cv=cv)
+            self.clf_sklearn, X=_X, y=_y, prefix=f'{endpoint}_prot_', cv=cv,
+            verbose=verbose)
         results.update(_res)
         auc_scores.update(_auc_roc)
         prc_scores.update(_auc_prc)
