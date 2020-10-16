@@ -23,7 +23,7 @@ file                      | description
 
 ## Disclaimer
 
-All datasets cannot be made public available yet until approval from the Danish Data Protection Agency is in place.
+All datasets will be made public when approval from the Danish Data Protection Agency is in place.
 
 ## Summary of the study
 ![alt text](figures/Study%20overview.jpg)
