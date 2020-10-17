@@ -1,6 +1,7 @@
 
 # Alcohol Related Liver Disease (ALD) project
 - Link to repository: [github.com/llniu/ALD-study](https://github.com/llniu/ALD-study)
+- Link to bioRxiv preprint: [A protein marker panel for liver disease](https://www.biorxiv.org/content/10.1101/2020.10.16.337592v1)
 - summary of scripts used for diverse analysis in the project
 - 459 ALD patients (to varying degrees) and 137 age-, bmi-, and gender matched healthy controls
 - Datasets generated and used in this study include proteomics, clinical data, and liver histology characterizations.
