@@ -12,30 +12,34 @@ import seaborn as sns
 import plotly.graph_objs as go
 from scipy import stats
 import plotly.express as px
-image1 = 'images/figure1.png'
 
-## Prepare images
+from config import FNAME_IMAGE1
+from config import DATA_PL_MEDIAN, DATA_LIVER_HEATMAP, DATA_PLCORR, DATA_PLASMA_LONG
+
+
+# Prepare images
 def png_encode(image_png):
     png_base64 = base64.b64encode(open(image_png, 'rb').read()).decode('ascii')
     return (png_base64)
-image1_base64 = png_encode(image1)
 
-## Prepare dataset
-data_liver_heatmap=pd.read_csv('datasets/liver_heatmap.csv').set_index('Leading Protein ID').iloc[:, :5]
 
-data_pl_median = pd.read_csv('datasets/PLoverlap_median.csv', index_col='Protein ID')
-options_ploverlap=[{'value': i, 'label':i} for i in list(data_pl_median['Genename_ProteinID'].unique())]
-data_plcorr=pd.read_csv('datasets/PLoverlap_data.csv', index_col='Protein ID')
-data_plasma_long=pd.read_csv('datasets/data_plasma_long.csv', index_col='Protein ID')
-options_box_plasma_proteinID=[{'value':i, 'label':i} for i in list(data_plasma_long['Genename_ProteinID'])]
-options_histology_score=[{'value':i, 'label':i} for i in ['kleiner', 'nas_inflam', 'nas_steatosis_ordinal']]
-## Figures
-df=data_pl_median.copy()
-fig_pl_scatter=go.Figure(data=go.Scatter(x=df['plasma'], y=df['liver'], mode='markers',
-                          text=df['Genename_ProteinID'], marker_color='lightyellow', marker_size=8))
-fig_pl_scatter.update_layout(title={'text':'Liver-Plasma proteome correlation', 'xanchor':'center'}, xaxis={'title':'MS signal in plasma [Log10]'},
-                 yaxis={'title':'MS signal in liver [Log10]'},
-                 width=500, plot_bgcolor='black', )
+image1_base64 = png_encode(FNAME_IMAGE1)
+
+# Prepare dataset
+data_liver_heatmap = pd.read_csv(
+    'datasets/liver_heatmap.csv').set_index('Leading Protein ID').iloc[:, :5]
+
+data_pl_median = pd.read_csv(DATA_PL_MEDIAN, index_col='Protein ID')
+options_ploverlap = [{'value': i, 'label': i}
+                     for i in list(data_pl_median['Genename_ProteinID'].unique())]
+
+data_plcorr = pd.read_csv(DATA_PLCORR, index_col='Protein ID')
+
+data_plasma_long = pd.read_csv(DATA_PLASMA_LONG, index_col='Protein ID')
+options_box_plasma_proteinID = [{'value': i, 'label': i}
+                                for i in list(data_plasma_long['Genename_ProteinID'])]
+options_histology_score = [{'value': i, 'label': i}
+                           for i in ['kleiner', 'nas_inflam', 'nas_steatosis_ordinal']]
 
 figure_colorful=px.scatter(data_frame=data_plcorr, x='plasma', y='liver', color='Genename_ProteinID')
 figure_colorful.update_layout(plot_bgcolor='black',
