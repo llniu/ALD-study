@@ -40,6 +40,8 @@ options_box_plasma_proteinID = [{'value': i, 'label': i}
                                 for i in list(data_plasma_long['Genename_ProteinID'])]
 options_histology_score = [{'value': i, 'label': i}
                            for i in ['kleiner', 'nas_inflam', 'nas_steatosis_ordinal']]
+# Figures
+df = data_pl_median #.copy()
 fig_pl_scatter = go.Figure(data=go.Scatter(x=df['plasma'], y=df['liver'], 
                                            mode='markers',
                                            text=df['Genename_ProteinID'], 
@@ -148,6 +150,7 @@ app.layout = html.Div([
     [Input('pl_median_scatter_input', 'value')]
 )
 def update_figure_plcorr_scatter(input_value):
+    df = data_pl_median #.copy()
     df['color'] = 'lightyellow'
     df.loc[input_value.split('__')[1], 'color'] = 'red'
     figure = go.Figure(data=go.Scatter(x=df['plasma'], y=df['liver'], mode='markers',
@@ -165,8 +168,8 @@ def update_figure_plcorr_scatter(input_value):
     [Input('pl_median_scatter_input', 'value')]
 )
 def update_figure_plcorr_scatter(input_value):
-    df=data_plcorr.copy()
-    df=df[df['Genename_ProteinID']==input_value]
+    # df = data_plcorr.copy()
+    df = data_plcorr[data_plcorr['Genename_ProteinID'] == input_value]
 
     fig = go.Figure(data=go.Scatter(x=df['plasma'], y=df['liver'], mode='markers',
                                     text=df['Genename_ProteinID'], 
@@ -184,6 +187,8 @@ def update_figure_plcorr_scatter(input_value):
      dash.dependencies.Input('boxplot_proteinID', 'value')]
 )
 def update_figure_plcorr_scatter(histologyscore, proteinID):
+    # df = data_plasma_long.copy()
+    df = data_plasma_long[data_plasma_long['Genename_ProteinID'] == proteinID]
     figure = px.box(df, x=histologyscore, y="Intensity", notched=True, points='all')
     figure.update_layout(plot_bgcolor='black', yaxis={
                          'title': 'Protein intensity [Log2]'}, 
