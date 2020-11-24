@@ -193,4 +193,5 @@ def update_figure_plcorr_scatter(histologyscore, proteinID):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    DEBUG = False
+    app.run_server(debug=DEBUG)
