@@ -1,8 +1,0 @@
-name: ald_study
-channels:
-  - defaults
-dependencies:
-  - dash~=1.8
-  - matplotlib
-  - pandas~=1.0
-  - seaborn~=0.11

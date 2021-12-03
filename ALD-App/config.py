@@ -4,9 +4,9 @@ FOLDER_DATA = "datasets"
 FOLDER_DATA = Path(FOLDER_DATA)
 
 DATA_PL_MEDIAN = FOLDER_DATA / 'PLoverlap_median.csv'
-DATA_LIVER_HEATMAP = FOLDER_DATA / 'liver_heatmap.csv'
 DATA_PLCORR = FOLDER_DATA / 'PLoverlap_data.csv'
-DATA_PLASMA_LONG = FOLDER_DATA / 'data_plasma_long.csv'
+DATA_PLASMA_LONG = FOLDER_DATA / 'data_plasma_long_minimal.csv'
+DATA_LIVER_LONG = FOLDER_DATA / 'data_liver_long_minimal.csv'
 
 FOLDER_IMAGES = Path('images')
-FNAME_IMAGE1 = Path('..') / 'figures' / 'Study overview.jpg'
+FNAME_IMAGE1 = FOLDER_IMAGES / 'Study overview.jpg'

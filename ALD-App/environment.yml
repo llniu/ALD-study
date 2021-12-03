@@ -18,6 +18,10 @@ dependencies:
   - wheel=0.35.1=py_0
   - xz=5.2.5=h1de35cc_0
   - zlib=1.2.11=h1de35cc_3
+  - dash~=1.8
+  - matplotlib
+  - pandas~=1.0
+  - seaborn~=0.11
   - pip:
     - brotli==1.0.9
     - click==7.1.2

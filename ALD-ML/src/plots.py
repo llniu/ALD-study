@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.metrics import auc
 
 logger = logging.getLogger()
-
+lw=1
 
 def plot_performance(ax, result, metric, title, _process_index=None):
     """Plot mean and standard deviation (stddev) of metrics.
@@ -29,7 +29,7 @@ def plot_performance(ax, result, metric, title, _process_index=None):
     """
     df = result.copy()
     df = df.sort_values(by=[(metric, 'mean')])
-    colors = np.where(['prot' in row for row in df.index], 'darkred', 'white')
+    colors = np.where(['prot' in row for row in df.index], 'navy', 'white')
     if _process_index is not None:
         df.index = _process_index(df.index)
     y = df.index
@@ -38,7 +38,7 @@ def plot_performance(ax, result, metric, title, _process_index=None):
     ax.set_xlim(0, 1.1)
     ax.tick_params(labelsize=15)
     ax.barh(y=y, width=width, xerr=xerr, capsize=4,
-            color=colors, height=0.6, edgecolor='black')
+            color=colors, height=0.6, edgecolor='black', lw=lw)
 
     metric_name = " ".join(metric.split('_')).capitalize()
     if metric == 'f1':
@@ -97,7 +97,7 @@ def plot_roc_curve(ax, runs_roc_scores, endpoint='', verbose=False):
         logger.info("95% CI:{}".format(CI))
 
     ax.plot(base_fpr, mean_tprs, color='royalblue',
-            label='Mean ROC\n(AUC = {}±{})'.format(mean_rocauc, sd_rocauc))
+            label='Mean ROC\n(AUC = {}±{})'.format(mean_rocauc, sd_rocauc), lw=lw)
     ax.fill_between(base_fpr, tprs_lower, tprs_upper,
                     color='grey', alpha=0.4, label='±1 std. dev')
 
