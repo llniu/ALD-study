@@ -9,4 +9,4 @@ figures
 *.ipynb_checkpoints
 *.pyc
 
-*.csv
+*.csv.DS_Store
