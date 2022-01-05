@@ -34,9 +34,9 @@ data_plcorr = pd.read_csv(DATA_PLCORR, index_col='Protein ID')
 data_plasma_long = pd.read_csv(DATA_PLASMA_LONG, index_col='Genename_ProteinID')
 data_liver_long = pd.read_csv(DATA_LIVER_LONG, index_col='Genename_ProteinID')
 options_box_plasma_proteinID = [{'value': i, 'label': i}
-                                for i in list(data_plasma_long.index)]
+                                for i in list(set(data_plasma_long.index))]
 options_box_liver_proteinID =  [{'value': i, 'label': i}
-                                for i in list(data_liver_long.index)]
+                                for i in list(set(data_liver_long.index))]
 options_histology_score = [{'value': i, 'label': i}
                            for i in ['kleiner', 'nas_inflam', 'nas_steatosis_ordinal']]
 # Figures
@@ -189,8 +189,9 @@ def update_figure_plcorr_scatter(input_value):
 )
 def figure_box_plot_plasma(histologyscore, proteinID):
     df = data_plasma_long.loc[proteinID]
+    df = df[df['score_type'] == histologyscore]
     df['mcolor']='deepskyblue'
-    figure = px.box(df, x=histologyscore, y="Intensity", notched=True, points='all', template=template,
+    figure = px.box(df, x='score', y="Intensity", notched=True, points='all', template=template,
                     color='mcolor', color_discrete_sequence=['steelblue'])
     figure.update_layout(yaxis={'title': 'Protein intensity [Log2]'},
                          title='Protein levels in plasma',
@@ -205,8 +206,9 @@ def figure_box_plot_plasma(histologyscore, proteinID):
 )
 def figure_box_plot_liver(histologyscore, proteinID):
     df = data_liver_long.loc[proteinID]
+    df = df[df['score_type'] == histologyscore]
     df['mcolor']='deepskyblue'
-    figure = px.box(df, x=histologyscore, y="Intensity", notched=False, points='all', template=template,
+    figure = px.box(df, x='score', y="Intensity", notched=False, points='all', template=template,
                     color='mcolor', color_discrete_sequence=['steelblue'])
     figure.update_layout(yaxis={'title': 'Protein intensity [Log2]'},
                          title='Protein levels in the liver',
