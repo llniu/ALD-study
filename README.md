@@ -3,8 +3,9 @@
 - Link to repository: [github.com/llniu/ALD-study](https://github.com/llniu/ALD-study)
 - Link to bioRxiv preprint: [A protein marker panel for liver disease](https://www.biorxiv.org/content/10.1101/2020.10.16.337592v1)
 - summary of scripts used for diverse analysis in the project
-- 459 ALD patients (to varying degrees) and 137 age-, bmi-, and gender matched healthy controls
-- Datasets generated and used in this study include proteomics, clinical data, and liver histology characterizations.
+- 459 ALD patients (to varying degrees) and 137 age-, bmi-, and gender matched healthy controls in the discovery cohort
+- 63 ALD patients in the validation cohort
+- Datasets generated and used in this study include proteomics, clinical data (baseline and follow-up), and liver histology characterization.
 
 ## Contents
 
@@ -13,7 +14,7 @@ file                      | description
 [ALD_ML](ALD-ML/ALD_ML.ipynb)    | Contains data pre-processing, Feature Selection, <br> Cross-Validation runs, Final model calculation and diverse <br> plots. Some functionality is loaded from [`src`](ALD-ML/src)
 [ALD_ML_STATA](ALD-ML/ALD_ML_STATA.ipynb) | References to STATA `.do` files in main folder. Done in hospital on follow-up data.
 [ALD_PA](ALD-PA/ALD_PA.ipynb)    | Contains Proteomics and Clinical data pre-processing, ANCOVA, Partial correlation, Integration between the liver- and plasma proteomes, and plots.
-[ALD_App](ALD-App/ALD_app.py)     | Contains interactive data visualization Dash App. 
+[ALD_App](ALD-App/ALD_app.py)     | Contains interactive data visualization Dash App.
 
 ## BioRxiv
 
@@ -24,7 +25,7 @@ file                      | description
 
 ## Disclaimer
 
-All datasets will be made public when approval from the Danish Data Protection Agency is in place.
+Summary data needed for the Dash app is open-access. The complete plasma proteomics data and clinical data are available from the authors upon reasonable request due to the need to maintain patient confidentiality.
 
 ## Summary of the study
-![alt text](figures/Study%20overview.jpg)
+![alt text](ALD-App/images/Study_overview.jpg)

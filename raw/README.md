@@ -3,10 +3,10 @@
 This folder should contain the following files
 
 ```
-20190620_210717_20190620_P0000005_Lili2Klibrary_Report.csv
+Protein_ALDupgrade_Report.csv
 clinical_marker_test_cut-offs.xlsx
 df_cli_164.csv
-Experiment annotation file.csv
+Experiment annotation file_upgrade.csv
 ID_matching_key.csv
 naming_scheme.csv
 README.txt
