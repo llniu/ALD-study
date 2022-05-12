@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import pandas as pd
 from sklearn.metrics import auc
 
 logger = logging.getLogger()
@@ -39,6 +40,49 @@ def plot_performance(ax, result, metric, title, _process_index=None):
     ax.tick_params(labelsize=15)
     ax.barh(y=y, width=width, xerr=xerr, capsize=4,
             color=colors, height=0.6, edgecolor='black', lw=lw)
+
+    metric_name = " ".join(metric.split('_')).capitalize()
+    if metric == 'f1':
+        metric_name += ' score'
+    ax.set_title('{}\n{}'.format(title, metric_name), fontsize=15)
+    return ax
+
+def plot_performance_adddots(ax, result, result_data, metric, title, _process_index=None):
+    """Plot mean and standard deviation (stddev) of metrics.
+
+    Parameters
+    ----------
+    ax : matplotlib.Axes
+        Axes to draw on.
+    result : pandas.DataFrame
+        results. Rows are models. Each metric has a mean and stddev in a MultiIndex
+        columns object of the type ('metric', ('mean', 'stddev'))
+    metric : pandas.DataFrame
+        The metric to select from the columns of the `result` DataFrame.
+    title : str
+        Title of the axes
+    _process_index : function, optional
+        Function to process model names, by default None
+
+    Returns
+    -------
+    matplotlib.Axes
+        Return reference to the passed ax of the argument `ax`
+    """
+    df = result.copy()
+    df = df.sort_values(by=[(metric, 'mean')])
+    df_data= pd.DataFrame.from_dict(result_data)[df.index]
+    colors = np.where(['prot' in row for row in df.index], 'navy', 'white')
+    if _process_index is not None:
+        df.index = _process_index(df.index)
+    y = df.index
+    width = df[(metric, 'mean')]
+    xerr = df[(metric, 'std')]
+    ax.set_xlim(0, 1.1)
+    ax.tick_params(labelsize=15)
+    ax.barh(y=y, width=width, xerr=xerr, capsize=4,
+            color=colors, height=0.6, edgecolor='black', lw=lw)
+    ax.plot(df_data.loc[metric].tolist(), np.arange(df_data.shape[1]), 'b.', )
 
     metric_name = " ".join(metric.split('_')).capitalize()
     if metric == 'f1':
